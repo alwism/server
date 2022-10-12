@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+set -e
 # Make relative paths work
 # Get FQP of script
 VAR_SCRIPT=$(readlink -f "${0}")

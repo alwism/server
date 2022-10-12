@@ -1,21 +1,19 @@
 FROM rust as base
+RUN cargo install sccache
+ENV RUSTC_WRAPPER=sccache
+
+FROM base as build
 WORKDIR "/app"
 COPY Cargo.lock Cargo.lock
 COPY Cargo.toml Cargo.toml
 COPY src src
-
-FROM base as build-debug
-RUN cargo build; \
-    cargo install --path .;
-
-FROM base as build-release
-RUN cargo build --release; \
-    cargo install --path .;
+RUN cargo build;
+RUN cargo build --release;
 
 FROM ubuntu as debug
-COPY --from=build-debug /app/target/debug/server /usr/bin/server
+COPY --from=build /app/target/debug/server /usr/bin/server
 CMD ["server"]
 
 FROM ubuntu as release
-COPY --from=build-release /app/target/release/server /usr/bin/server
+COPY --from=build /app/target/release/server /usr/bin/server
 CMD ["server"]
